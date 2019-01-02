@@ -1,0 +1,34 @@
+    .data
+n:
+	.word 0
+    .text
+main:
+li $t0, 1
+la $t1, n
+sw $t0, 0($t1)
+la $t0, n
+lw $t0, 0($t0)
+li $t1, 1
+sub $t0, $t0, $t1
+bne $t0, $zero, L0
+la $t0, n
+lw $t0, 0($t0)
+li $t1, 2
+sub $t0, $t0, $t1
+ble $t0, $zero, L1
+la $t0, n
+lw $t0, 0($t0)
+li $t1, 3
+sub $t0, $t0, $t1
+blt $t0, $zero, L2
+la $t0, n
+lw $t0, 0($t0)
+li $t1, 4
+add $t0, $t0, $t1
+la $t1, n
+sw $t0, 0($t1)
+L0:
+L1:
+L2:
+li $v0, 10
+syscall

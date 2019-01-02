@@ -1,0 +1,18 @@
+// A program to sum 1 to n
+Program sum Begin
+    Var n
+    Var s
+    
+    Read n
+    If n < 0 Then
+        Write -10000000000000000000000000000
+        Exit
+    Else
+        Set s = 0
+    EndIf
+    While n > 0 Do
+        Set s = s + n
+        Set n = n - 1
+    EndWhile
+    Write s;
+End

@@ -1,0 +1,30 @@
+#### 注意 ####
+1. 因為詞彙分析器以及語法分析器互相調用的關係，yylval 已固定宣告在 sunflower.tab.h。
+sunflower.y 以及 sunflower.l 必須先引入此頭檔
+2. 無法在 union yylval 的 union 中塞 union，所有變數會賦予一樣的值 (原因不明)；
+可以塞 struct
+##############      
+
+目的: 將 sunflower 語言轉譯成 MIPS
+用第二次 project 定義的詞彙、語法分析
+1. 程式起頭 (12/29)
+2. declarations (12/29)
+3. ALUs (1/1)
+- arithmeticExpression
+- arithmeticTerm
+- arithmeticFactor
+- primaryExpression
+4. Branches
+- IF (1/2)
+- IF ELSE
+- NOT (1/2)
+
+# L0: else；L1: 進 stmt
+# (a == b):
+# sub $t0, $t0, $t1
+# bne $t0, $zero, L0
+# b L1 (stmt)
+- AND (1/2)
+- OR
+5. System calls
+6. 
