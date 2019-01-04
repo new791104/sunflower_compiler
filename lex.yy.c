@@ -521,20 +521,22 @@ char *makeIdentifierInstr(char*, char*, char*);
 char* makeBranchInstr(char*, char*, char*, char*, char*);
 char *newLabel();
 char *makebooleanTermInstr(char *text, branch_type branch);
-char *deleteLine(char *text);
+char *deleteLine(char *text, int addr);
 char *formatLabel(char *label);
 char *doNEG(char*);
 int countLines(char *text);
 char *substr(char *dest, char *src, int start, int cnt);
-char *insertInstr(char *text, char *mid, int addr, int isAnd);
+char *insertInstr(char *text, char *mid, int addr);
+char *findLastLine(char *text);
+int findLastLineAddr(char *text);
 
 int integer_length(int integer);
 int REG_TEMP[10] = {0};
 int REG_TEMP_LENGTH = sizeof(REG_TEMP) / sizeof(int);
 int LABEL_COUNTER = 0;
-#line 535 "lex.yy.c"
-
 #line 537 "lex.yy.c"
+
+#line 539 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -752,9 +754,9 @@ YY_DECL
 		}
 
 	{
-#line 37 "sunflower.l"
+#line 39 "sunflower.l"
 
-#line 757 "lex.yy.c"
+#line 759 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -814,174 +816,174 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 38 "sunflower.l"
+#line 40 "sunflower.l"
 {yylineno++;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 39 "sunflower.l"
+#line 41 "sunflower.l"
 {return AND;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 40 "sunflower.l"
+#line 42 "sunflower.l"
 {return BEGIN_;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 41 "sunflower.l"
+#line 43 "sunflower.l"
 {return DO;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 42 "sunflower.l"
+#line 44 "sunflower.l"
 {return ELSE;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 43 "sunflower.l"
+#line 45 "sunflower.l"
 {return END;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 44 "sunflower.l"
+#line 46 "sunflower.l"
 {return ENDIF;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 45 "sunflower.l"
+#line 47 "sunflower.l"
 {return ENDWHILE;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 46 "sunflower.l"
+#line 48 "sunflower.l"
 {return EXIT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 47 "sunflower.l"
+#line 49 "sunflower.l"
 {return IF;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 48 "sunflower.l"
+#line 50 "sunflower.l"
 {return SET;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 49 "sunflower.l"
+#line 51 "sunflower.l"
 {return NOT;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 50 "sunflower.l"
+#line 52 "sunflower.l"
 {return OR;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 51 "sunflower.l"
+#line 53 "sunflower.l"
 {return PROGRAM;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 52 "sunflower.l"
+#line 54 "sunflower.l"
 {return READ;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 53 "sunflower.l"
+#line 55 "sunflower.l"
 {return THEN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 54 "sunflower.l"
+#line 56 "sunflower.l"
 {
     return VAR;
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 57 "sunflower.l"
+#line 59 "sunflower.l"
 {return WHILE;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 58 "sunflower.l"
+#line 60 "sunflower.l"
 {return WRITE;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 59 "sunflower.l"
+#line 61 "sunflower.l"
 {return ADD;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 60 "sunflower.l"
+#line 62 "sunflower.l"
 {return SUB;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 61 "sunflower.l"
+#line 63 "sunflower.l"
 {return MUL;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 62 "sunflower.l"
+#line 64 "sunflower.l"
 {return DIV;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 63 "sunflower.l"
+#line 65 "sunflower.l"
 {return MOD;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 64 "sunflower.l"
+#line 66 "sunflower.l"
 {return GIVE;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 65 "sunflower.l"
+#line 67 "sunflower.l"
 {return EQUAL;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 66 "sunflower.l"
+#line 68 "sunflower.l"
 {return NEQUAL;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 67 "sunflower.l"
+#line 69 "sunflower.l"
 {return GREATER;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 68 "sunflower.l"
+#line 70 "sunflower.l"
 {return GEQUAL;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 69 "sunflower.l"
+#line 71 "sunflower.l"
 {return SMALLER;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 70 "sunflower.l"
+#line 72 "sunflower.l"
 {return SEQUAL;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 71 "sunflower.l"
+#line 73 "sunflower.l"
 {return LEFTBRACKET;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 72 "sunflower.l"
+#line 74 "sunflower.l"
 {return RIGHTBRACKET;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 75 "sunflower.l"
+#line 77 "sunflower.l"
 {
     if (yyleng > 16) {
         char buffer[10];
@@ -994,7 +996,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 84 "sunflower.l"
+#line 86 "sunflower.l"
 {
     int integer = atoi(yytext);
     if (integer > 0x4FFF || integer < -0x4FFF) {
@@ -1008,7 +1010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 95 "sunflower.l"
+#line 97 "sunflower.l"
 {
     BEGIN COMMENT;
 }
@@ -1016,7 +1018,7 @@ YY_RULE_SETUP
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 99 "sunflower.l"
+#line 101 "sunflower.l"
 {
     yylineno++;
     BEGIN INITIAL;
@@ -1024,20 +1026,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 104 "sunflower.l"
+#line 106 "sunflower.l"
 {
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 107 "sunflower.l"
+#line 109 "sunflower.l"
 {
     // do nothing
 }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 111 "sunflower.l"
+#line 113 "sunflower.l"
 {
     char buffer[1];
     sprintf(buffer, "Lexical error: line %d unknown character %s\n", yylineno, yytext);
@@ -1046,10 +1048,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 117 "sunflower.l"
+#line 119 "sunflower.l"
 ECHO;
 	YY_BREAK
-#line 1052 "lex.yy.c"
+#line 1054 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -2055,7 +2057,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 117 "sunflower.l"
+#line 119 "sunflower.l"
 
 int yywrap()
 {
@@ -2131,6 +2133,9 @@ char *newLabel() {
 }
 
 char *formatLabel(char *label) {
+    unsigned char head = *(label), last = *(label + strlen(label) - 1);
+    if (head == '\n' || last == ':' || !strcmp(label, ""))
+        return label;
     char *nexline = "\n", *colon = ":";
     char *label_format = malloc(strlen(label) + 2 + 1);
     label_format[strlen(label_format) - 1] = '\0';
@@ -2157,24 +2162,6 @@ int integer_length(int integer) {
 //     snprintf(label_format, sizeof(label_format), "\n%s:", label);
 //     return combineStr(branch.label_array, label_format);
 // }
-
-char *deleteLine(char *text) {
-    int i = 0;
-    char *output;
-    for (i = strlen(text); i >= 0; i--) {
-        char tmp = *(text + i);
-        if (tmp == '\n') {
-            break;
-        }
-    }
-    output = malloc(strlen(text));
-    strncpy(output, text, i);
-    // printf("text: %s\n", text);
-    // printf("# output: %s\n", output);
-    // printf("# size: %d", strlen(output));
-    // printf("# text size: %d", strlen(text));
-    return output;
-}
 
 char *doNEG(char *op) {
     if (!strcmp(op, "beq")) {
@@ -2217,14 +2204,61 @@ char *substr(char *dest, char *src, int start, int cnt) {
     return dest;
 }
 
-char *insertInstr(char *text, char *mid, int addr, int isAnd) {
+char *insertInstr(char *text, char *mid, int addr) {
     char *output = (char*)malloc(strlen(text) + strlen(mid));
     strncpy(output, text, addr);
     output[addr] = '\0';
-    if (isAnd == 0)
-        output = deleteLine(output);
     combineStr(output, "\0");
     strcat(output, mid);
     strcat(output, text + addr);
+    return output;
+}
+
+char *findLastLine(char *text) {
+    int i = 0, text_len = strlen(text);
+    char *output;
+    for (i = 0; i <= text_len; i++) {
+        char tmp = *(text + text_len - i);
+        printf("tmp: %c\n", tmp);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    output = malloc(i + 1);
+    printf("#### text_len - i: %d\n", text_len - i);
+    strncpy(output, text + text_len - i, text_len);
+    printf("##### output: %s\n", output);
+    return output;
+}
+
+int findLastLineAddr(char *text) {
+    int i = 0, text_len = strlen(text);
+    for (i = 0; i <= text_len; i++) {
+        char tmp = *(text + text_len - i);
+        printf("tmp: %c\n", tmp);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    return text_len - i;
+}
+
+char *deleteLine(char *text, int addr) {
+    int i = 0, text_len = strlen(text);
+    char *output, *front, *behind;
+    
+    for (i = addr - 1; i >= 0; i--) {
+        char tmp = *(text + i);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    output = malloc(text_len);
+    front = malloc(i);
+    behind = malloc(text_len - addr + 1);
+    strncpy(front, text, i);
+    strncpy(behind, text + addr, text_len - addr + 1);
+    output = combineStr(front, behind);
+    printf("##################\n%s#######################\n", output);
     return output;
 }

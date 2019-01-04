@@ -16,12 +16,14 @@ char *makeIdentifierInstr(char*, char*, char*);
 char* makeBranchInstr(char*, char*, char*, char*, char*);
 char *newLabel();
 char *makebooleanTermInstr(char *text, branch_type branch);
-char *deleteLine(char *text);
+char *deleteLine(char *text, int addr);
 char *formatLabel(char *label);
 char *doNEG(char*);
 int countLines(char *text);
 char *substr(char *dest, char *src, int start, int cnt);
-char *insertInstr(char *text, char *mid, int addr, int isAnd);
+char *insertInstr(char *text, char *mid, int addr);
+char *findLastLine(char *text);
+int findLastLineAddr(char *text);
 
 int integer_length(int integer);
 int REG_TEMP[10] = {0};
@@ -189,6 +191,9 @@ char *newLabel() {
 }
 
 char *formatLabel(char *label) {
+    unsigned char head = *(label), last = *(label + strlen(label) - 1);
+    if (head == '\n' || last == ':' || !strcmp(label, ""))
+        return label;
     char *nexline = "\n", *colon = ":";
     char *label_format = malloc(strlen(label) + 2 + 1);
     label_format[strlen(label_format) - 1] = '\0';
@@ -215,24 +220,6 @@ int integer_length(int integer) {
 //     snprintf(label_format, sizeof(label_format), "\n%s:", label);
 //     return combineStr(branch.label_array, label_format);
 // }
-
-char *deleteLine(char *text) {
-    int i = 0;
-    char *output;
-    for (i = strlen(text); i >= 0; i--) {
-        char tmp = *(text + i);
-        if (tmp == '\n') {
-            break;
-        }
-    }
-    output = malloc(strlen(text));
-    strncpy(output, text, i);
-    // printf("text: %s\n", text);
-    // printf("# output: %s\n", output);
-    // printf("# size: %d", strlen(output));
-    // printf("# text size: %d", strlen(text));
-    return output;
-}
 
 char *doNEG(char *op) {
     if (!strcmp(op, "beq")) {
@@ -275,14 +262,61 @@ char *substr(char *dest, char *src, int start, int cnt) {
     return dest;
 }
 
-char *insertInstr(char *text, char *mid, int addr, int isAnd) {
+char *insertInstr(char *text, char *mid, int addr) {
     char *output = (char*)malloc(strlen(text) + strlen(mid));
     strncpy(output, text, addr);
     output[addr] = '\0';
-    if (isAnd == 0)
-        output = deleteLine(output);
     combineStr(output, "\0");
     strcat(output, mid);
     strcat(output, text + addr);
+    return output;
+}
+
+char *findLastLine(char *text) {
+    int i = 0, text_len = strlen(text);
+    char *output;
+    for (i = 0; i <= text_len; i++) {
+        char tmp = *(text + text_len - i);
+        printf("tmp: %c\n", tmp);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    output = malloc(i + 1);
+    printf("#### text_len - i: %d\n", text_len - i);
+    strncpy(output, text + text_len - i, text_len);
+    printf("##### output: %s\n", output);
+    return output;
+}
+
+int findLastLineAddr(char *text) {
+    int i = 0, text_len = strlen(text);
+    for (i = 0; i <= text_len; i++) {
+        char tmp = *(text + text_len - i);
+        printf("tmp: %c\n", tmp);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    return text_len - i;
+}
+
+char *deleteLine(char *text, int addr) {
+    int i = 0, text_len = strlen(text);
+    char *output, *front, *behind;
+    
+    for (i = addr - 1; i >= 0; i--) {
+        char tmp = *(text + i);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    output = malloc(text_len);
+    front = malloc(i);
+    behind = malloc(text_len - addr + 1);
+    strncpy(front, text, i);
+    strncpy(behind, text + addr, text_len - addr + 1);
+    output = combineStr(front, behind);
+    printf("##################\n%s#######################\n", output);
     return output;
 }
