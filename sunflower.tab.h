@@ -88,9 +88,11 @@ enum yytokentype
 #endif
 typedef struct branch_type
 {
-   char *op;
    char *reg;
-   char *label_array;
+   char *label_stmt;
+   char *label_else;
+   int isAnd;
+   int last_addr;
 } branch_type;
 
 #if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED

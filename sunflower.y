@@ -18,7 +18,12 @@ extern char *makeIdentifierInstr(char*, char*, char*);
 extern char *makeBranchInstr(char*, char*, char*, char*, char*);
 extern char *newLabel();
 extern char *makebooleanTermInstr(char *text, branch_type branch);
-// extern char *doNEG(char*);
+extern char *deleteLine(char *text);
+extern char *formatLabel(char *label);
+extern char *doNEG(char*);
+extern int countLines(char *text);
+extern char *substr(char *dest, char *src, int start, int cnt);
+extern char *insertInstr(char *text, char *mid, int addr, int isAnd);
 
 char *data = "    .data";
 char *text = "\n    .text\nmain:";
@@ -29,7 +34,7 @@ char *text = "\n    .text\nmain:";
 %token AND BEGIN_ DO ELSE END ENDIF ENDWHILE EXIT IF SET NOT OR PROGRAM READ THEN VAR WHILE WRITE
 %start program
 
-%type <str> IDENTIFIER program declarations statements statement
+%type <str> program declarations statements statement INTCONST IDENTIFIER
 %type <str> arithmeticExpression arithmeticTerm arithmeticFactor primaryExpression
 %type <branch> booleanExpression booleanTerm booleanFactor relationExpression
 %%
@@ -48,7 +53,7 @@ declarations:
     declarations VAR IDENTIFIER { 
         printf("declarations -> declarations Var Identifier\n");
         char *result = "\n";
-        result = combineStr(result, yylval.str);
+        result = combineStr(result, $3);
         result = combineStr(result, ":\n\t.word 0");
         data = combineStr(data, result);
     }
@@ -70,9 +75,20 @@ statement:
     }
     | IF booleanExpression THEN statements ENDIF { 
         printf("statement -> If booleanExpression Then statements EndIf\n");
-        char result[20];
-        snprintf(result, sizeof(result), "%s", $2.label_array);
-        text = combineStr(text, result);
+        // char result[20];
+        // snprintf(result, sizeof(result), "%s", $2.label_else);
+        if ($2.isAnd) {
+            // And
+        }
+        else {
+            // Or
+            int last_addr = $2.last_addr, org_length = strlen(text);
+            char *front = malloc(last_addr + 1), *mid = $2.label_stmt, *behind = malloc(org_length - last_addr + 1);
+            text = insertInstr(text, mid, last_addr, 0);
+            // text = combineStr(text, behind);
+            // printf("######\n\nfront: %s\n\nmid: %s\n\nbehind: %s\n######\n", front, mid, behind);
+        }
+        text = combineStr(text, $2.label_else);
     }
     | IF booleanExpression THEN statements ELSE statements ENDIF { 
         printf("statement -> If booleanExpression Then statements Else statements EndIf\n"); 
@@ -85,141 +101,132 @@ statement:
 booleanExpression: 
     booleanExpression OR booleanTerm { 
         printf("booleanExpression -> booleanExpression Or booleanTerm\n");
+        text = combineStr(text, $3.label_else);
+        $$.last_addr = strlen(text);
+        $$.label_else = $3.label_else;
+        $$.label_stmt = combineStr($1.label_stmt, $3.label_stmt);
     }
     | booleanTerm { 
-        printf("booleanExpression -> booleanTerm\n"); 
-        // char result[20], *label = newLabel(), label_format[10];
-        // snprintf(result, sizeof(result), "\n%s %s, $zero, %s", $1.op, $1.reg, label);
-        // text = combineStr(text, result);
-        // putReg($1.reg);
-        // snprintf(label_format, sizeof(label_format), "\n%s:", label);
-        // $$.label_array = combineStr($1.label_array, label_format);
+        printf("booleanExpression -> booleanTerm\n");
+        if ($1.isAnd) {
+            // insert
+            
+            char *mid = formatLabel($1.label_stmt);
+            int last_addr = $1.last_addr;
+            text = insertInstr(text, mid, last_addr, 1);
+            $$.last_addr = strlen(text);
+        }
+        else {
+            text = combineStr(text, $1.label_else);
+            // text = combineStr(text, "\n### booleanTerm");
+        }
     }
     ;
 booleanTerm: 
-    booleanTerm AND booleanFactor { 
+    booleanTerm AND booleanFactor {
         printf("booleanTerm -> booleanTerm And booleanFactor\n");
-        char result[20], *label = newLabel(), label_format[10];
-        snprintf(result, sizeof(result), "\n%s %s, $zero, %s", $3.op, $3.reg, label);
+        char result[20], *mid = $1.label_stmt;
+        int last_addr = $1.last_addr;
+        // insert
+        text = insertInstr(text, mid, last_addr, 1);
+        snprintf(result, sizeof(result), "\nb %s", $3.label_else);
         text = combineStr(text, result);
-        putReg($1.reg);
-        snprintf(label_format, sizeof(label_format), "\n%s:", label);
-        $$.label_array = combineStr($1.label_array, label_format);
+        
+        $$.last_addr = strlen(text);
+        $$.label_else = combineStr($1.label_else, formatLabel($3.label_else));
+        $$.label_stmt = $3.label_stmt;
+        $$.isAnd = 1;
     }
     | booleanFactor { // 第一個條件
-        printf("booleanTerm -> booleanFactor\n"); 
-        // $$.op = $1.op;
-        // $$.reg = $1.reg;
-        // $$.label_array = "";
-
-        char result[20], *label = newLabel(), label_format[10];
-        snprintf(result, sizeof(result), "\n%s %s, $zero, %s", $1.op, $1.reg, label);
+        printf("booleanTerm -> booleanFactor\n");
+        char result[20], *label_else = $1.label_else, *label_stmt = $1.label_stmt;
+        snprintf(result, sizeof(result), "\nb %s", label_else);
         text = combineStr(text, result);
-        putReg($1.reg);
-        snprintf(label_format, sizeof(label_format), "\n%s:", label);
-        $$.label_array = combineStr($1.label_array, label_format);
+        $$.last_addr = strlen(text);
+        $$.label_else = formatLabel(label_else);
+        $$.label_stmt = formatLabel(label_stmt);
+        $$.isAnd = 0;
     }
     ;
 booleanFactor: 
     NOT booleanFactor { 
         printf("booleanFactor -> Not booleanFactor\n");
-        // $$.op = doNEG($2.op);
-        if ($2.op == "beq") {
-            $$.op =  "bne";
-        }
-        else if ($2.op == "bne") {
-            $$.op = "beq";
-        }
-        else if ($2.op == "bgt") {
-            $$.op = "ble";
-        }
-        else if ($2.op == "bge") {
-            $$.op = "blt";
-        }
-        else if ($2.op == "blt") {
-            $$.op = "bge";
-        }
-        else if ($2.op == "ble") {
-            $$.op = "bgt";
-        }
-        else {
-            $$.op = combineStr("input: ", $2.op);
-        }
-        $$.reg = $2.reg;
-        $$.label_array = "";
+        $$.label_else = $2.label_stmt;
+        $$.label_stmt = $2.label_else;
     }
     | relationExpression { 
         printf("booleanFactor -> relationExpression\n");
-        $$.op = $1.op;
-        $$.reg = $1.reg;
-        $$.label_array = "";
+        $$.label_else = $1.label_else;
+        $$.label_stmt = $1.label_stmt;
     }
     ;
 relationExpression: 
     arithmeticExpression EQUAL arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression == arithmeticExpression\n");
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "beq", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "bne";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     | arithmeticExpression NEQUAL arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression <> arithmeticExpression\n"); 
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "bne", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "beq";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     | arithmeticExpression GREATER arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression > arithmeticExpression\n");
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "bgt", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "ble";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     | arithmeticExpression GEQUAL arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression >= arithmeticExpression\n"); 
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "bge", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "blt";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     | arithmeticExpression SMALLER arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression < arithmeticExpression\n");
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "blt", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "bge";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     | arithmeticExpression SEQUAL arithmeticExpression { 
         printf("relationExpression -> arithmeticExpression <= arithmeticExpression\n");
-        char result[20], *rs = $1, *rt = $3;
-        snprintf(result, sizeof(result), "\nsub %s, %s, %s", rs, rs, rt);
-        text = combineStr(text, result);
+        char result[20], *rs = $1, *rt = $3, *label_else = newLabel(), *label_stmt = newLabel();
+        text = makeBranchInstr(text, "ble", rs, rt, label_stmt);
         putReg(rt);
-        $$.op = "bgt";
-        $$.reg = rs;
+        putReg(rs);
+        $$.label_else = label_else;
+        $$.label_stmt = label_stmt;
     }
     ;
 arithmeticExpression: 
     arithmeticExpression ADD arithmeticTerm { 
         printf("arithmeticExpression -> arithmeticExpression + arithmeticTerm\n"); 
         text = makeAluInstr(text, "add", $1, $3, $1);
+        putReg($3);
         $$ = $1;
     }
     | arithmeticExpression SUB arithmeticTerm { 
         printf("arithmeticExpression -> arithmeticExpression - arithmeticTerm\n");
         text = makeAluInstr(text, "sub", $1, $3, $1);
+        putReg($3);
         $$ = $1;
     }
     | arithmeticTerm { 
@@ -231,16 +238,19 @@ arithmeticTerm:
     arithmeticTerm MUL arithmeticFactor { 
         printf("arithmeticTerm -> arithmeticTerm * arithmeticFactor\n");
         text = makeAluInstr(text, "mul", $1, $3, $1);
+        putReg($3);
         $$ = $1;
     }
     | arithmeticTerm DIV arithmeticFactor { 
         printf("arithmeticTerm -> arithmeticTerm / arithmeticFactor\n"); 
         text = makeAluInstr(text, "div", $1, $3, $1);
+        putReg($3);
         $$ = $1;
     }
     | arithmeticTerm MOD arithmeticFactor { 
         printf("arithmeticTerm -> arithmeticTerm % arithmeticFactor\n"); 
         text = makeAluInstr(text, "rem", $1, $3, $1);
+        putReg($3);
         $$ = $1;
     }
     | arithmeticFactor { 
@@ -264,7 +274,7 @@ arithmeticFactor:
 primaryExpression: 
     INTCONST { 
         printf("primaryExpression -> IntConst\n");
-        char result[20], *reg = getReg(), *intconst = yylval.str;
+        char result[20], *reg = getReg(), *intconst = $1;
         snprintf(result, sizeof(result), "\nli %s, %s", reg, intconst);
         text = combineStr(text, result);
         $$ = reg;
@@ -272,7 +282,7 @@ primaryExpression:
     | IDENTIFIER { 
         printf("primaryExpression -> Identifier\n");
         char *reg = getReg();
-        text = makeIdentifierInstr(text, reg, yylval.str);
+        text = makeIdentifierInstr(text, reg, $1);
         $$ = reg;
     }
     | LEFTBRACKET arithmeticExpression RIGHTBRACKET { 

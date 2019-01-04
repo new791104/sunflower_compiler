@@ -3,8 +3,9 @@
 *   sunflower 詞彙分析
 */
 #include <stdio.h>
-#include "sunflower.tab.h"
 #include <string.h>
+#include "sunflower.tab.h"
+
 char *exception_array = "\0";
 void lexerror(char*);
 char *combineStr(char*, char*);
@@ -15,7 +16,12 @@ char *makeIdentifierInstr(char*, char*, char*);
 char* makeBranchInstr(char*, char*, char*, char*, char*);
 char *newLabel();
 char *makebooleanTermInstr(char *text, branch_type branch);
-// char *doNEG(char*);
+char *deleteLine(char *text);
+char *formatLabel(char *label);
+char *doNEG(char*);
+int countLines(char *text);
+char *substr(char *dest, char *src, int start, int cnt);
+char *insertInstr(char *text, char *mid, int addr, int isAnd);
 
 int integer_length(int integer);
 int REG_TEMP[10] = {0};
@@ -157,7 +163,6 @@ char *makeAluInstr(char *text, char *op, char *rs, char *rt, char *rd) {
     char result[20];
     snprintf(result, sizeof(result), "\n%s %s, %s, %s", op, rd, rs, rt);
     text = combineStr(text, result);
-    putReg(rt);
     return text;
 }
 
@@ -165,13 +170,11 @@ char *makeBranchInstr(char *text, char *op, char *rs, char *rt, char *label) {
     char result[20];
     snprintf(result, sizeof(result), "\n%s %s, %s, %s", op, rs, rt, label);
     text = combineStr(text, result);
-    putReg(rs);
-    putReg(rt);
     return text;
 }
 
 char *makeIdentifierInstr(char *text, char *reg, char *label) {
-    char result[40];
+    char result[40] = {0};
     snprintf(result, sizeof(result), "\nla %s, %s", reg, label);
     snprintf(result, sizeof(result), "%s\nlw %s, 0(%s)", result, reg, reg);
     text = combineStr(text, result);
@@ -180,9 +183,17 @@ char *makeIdentifierInstr(char *text, char *reg, char *label) {
 
 char *newLabel() {
     char *result = malloc(integer_length(LABEL_COUNTER) + 1);
-    snprintf(result, sizeof(result), "L%d", LABEL_COUNTER);
+    snprintf(result, sizeof(result), "L%d\0", LABEL_COUNTER);
     LABEL_COUNTER++;
     return result;
+}
+
+char *formatLabel(char *label) {
+    char *nexline = "\n", *colon = ":";
+    char *label_format = malloc(strlen(label) + 2 + 1);
+    label_format[strlen(label_format) - 1] = '\0';
+    sprintf(label_format, "\n%s:", label);
+    return label_format;
 }
 
 int integer_length(int integer) {
@@ -196,37 +207,82 @@ int integer_length(int integer) {
     return i;
 }
 
-char *makebooleanTermInstr(char *text, branch_type branch) { 
-    char result[20], *label = newLabel(), label_format[10];
-    snprintf(result, sizeof(result), "\n%s %s, $zero, %s", branch.op, branch.reg, label);
-    text = combineStr(text, result);
-    putReg(branch.reg);
-    snprintf(label_format, sizeof(label_format), "\n%s:", label);
-    return combineStr(branch.label_array, label_format);
+// char *makebooleanTermInstr(char *text, branch_type branch) { 
+//     char result[20], *label = newLabel(), label_format[10];
+//     snprintf(result, sizeof(result), "\n%s %s, $zero, %s", branch.op, branch.reg, label);
+//     text = combineStr(text, result);
+//     putReg(branch.reg);
+//     snprintf(label_format, sizeof(label_format), "\n%s:", label);
+//     return combineStr(branch.label_array, label_format);
+// }
+
+char *deleteLine(char *text) {
+    int i = 0;
+    char *output;
+    for (i = strlen(text); i >= 0; i--) {
+        char tmp = *(text + i);
+        if (tmp == '\n') {
+            break;
+        }
+    }
+    output = malloc(strlen(text));
+    strncpy(output, text, i);
+    // printf("text: %s\n", text);
+    // printf("# output: %s\n", output);
+    // printf("# size: %d", strlen(output));
+    // printf("# text size: %d", strlen(text));
+    return output;
 }
 
-// char *doNEG(char *op) {
-//     printf("#### doNEG ####\ninput: %s\n", op);
-//     printf("size: %d\n", strlen(op));
-//     if (*op == "beq") {
-//         return "bne";
-//     }
-//     else if (*op == "bne") {
-//         return "beq";
-//     }
-//     else if (*op == "bgt") {
-//         return "ble";
-//     }
-//     else if (*op == "bge") {
-//         return "blt";
-//     }
-//     else if (*op == "blt") {
-//         return "bge";
-//     }
-//     else if (*op == "ble") {
-//         return "bgt";
-//     }
-//     else {
-//         return combineStr("input: ", op);
-//     }
-// }
+char *doNEG(char *op) {
+    if (!strcmp(op, "beq")) {
+        return "bne";
+    }
+    else if (!strcmp(op, "bne")) {
+        return "beq";
+    }
+    else if (!strcmp(op, "bgt")) {
+        return "ble";
+    }
+    else if (!strcmp(op, "bge")) {
+        return "blt";
+    }
+    else if (!strcmp(op, "blt")) {
+        return "bge";
+    }
+    else if (!strcmp(op, "ble")) {
+        return "bgt";
+    }
+    else {
+        return combineStr("input: ", op);
+    }
+}
+
+int countLines(char *text) {
+    int i, lines = 0;
+    for (i = 0; i < strlen(text); i++) {
+        char tmp = *(text + i);
+        if (tmp == '\n') {
+            lines++;
+        }
+    }
+    return lines;
+}
+
+char *substr(char *dest, char *src, int start, int cnt) {
+    strncpy(dest, src + start, cnt);
+    dest[cnt] = 0;
+    return dest;
+}
+
+char *insertInstr(char *text, char *mid, int addr, int isAnd) {
+    char *output = (char*)malloc(strlen(text) + strlen(mid));
+    strncpy(output, text, addr);
+    output[addr] = '\0';
+    if (isAnd == 0)
+        output = deleteLine(output);
+    combineStr(output, "\0");
+    strcat(output, mid);
+    strcat(output, text + addr);
+    return output;
+}
