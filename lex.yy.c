@@ -990,7 +990,7 @@ YY_RULE_SETUP
         sprintf(buffer, "Lexical error: line %d identifier length too long\n", yylineno);
         exception_array = combineStr(exception_array, buffer);
     }
-    yylval.str = combineStr(yytext, "\0");
+    yylval.stmt.var_label = combineStr(yytext, "\0");
     return IDENTIFIER;
 }
 	YY_BREAK
@@ -1004,7 +1004,7 @@ YY_RULE_SETUP
         sprintf(buffer, "Lexical error: line %d illegal integer constant\n", yylineno);
         exception_array = combineStr(exception_array, buffer);
     }
-    yylval.str = combineStr(yytext, "\0");
+    yylval.stmt.reg = combineStr(yytext, "\0");
     return INTCONST;
 }
 	YY_BREAK
@@ -2121,9 +2121,7 @@ char *makeIdentifierInstr(char *text, char *reg, char *label) {
     char result[40] = {0};
     snprintf(result, sizeof(result), "\nla %s, %s", reg, label);
     snprintf(result, sizeof(result), "%s\nlw %s, 0(%s)", result, reg, reg);
-    
     text = combineStr(text, result);
-    printf("# flag\n");
     return text;
 }
 

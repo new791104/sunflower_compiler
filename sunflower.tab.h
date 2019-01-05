@@ -95,14 +95,19 @@ typedef struct branch_type
    int last_addr;
 } branch_type;
 
+typedef struct stmt_type
+{
+   char *reg;
+   char *var_label;
+   int last_addr;
+} stmt_type;
+
 #if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE {
-/* Line 2058 of yacc.c  */
-#line 30 "sunflower.y"
+   /* Line 2058 of yacc.c  */
+   // #line 30 "sunflower.y"
 
-   float floatVal;
-   int intVal;
-   char *str;
+   stmt_type stmt;
    branch_type branch;
 
 /* Line 2058 of yacc.c  */

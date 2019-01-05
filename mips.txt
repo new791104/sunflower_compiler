@@ -1,8 +1,13 @@
-    .data
+	.data
 n:
 	.word 0
-    .text
+k:
+	.word 0
+	.text
 main:
+li $t0, 2
+la $t1, k
+sw $t0, 0($t1)
 li $t0, 1
 la $t1, n
 sw $t0, 0($t1)
@@ -11,20 +16,19 @@ lw $t0, 0($t0)
 li $t1, 1
 beq $t0, $t1, L1
 b L0
-L1:
+L0:
 la $t0, n
 lw $t0, 0($t0)
 li $t1, 2
 beq $t0, $t1, L3
 b L2
-L0:
-L2:
+L3:
 la $t0, n
 lw $t0, 0($t0)
 li $t1, 3
 beq $t0, $t1, L5
 b L4
-L3:
+L1:
 L5:
 la $t0, n
 lw $t0, 0($t0)
@@ -32,6 +36,7 @@ li $t1, 5
 add $t0, $t0, $t1
 la $t1, n
 sw $t0, 0($t1)
+L2:
 L4:
 li $v0, 10
 syscall
