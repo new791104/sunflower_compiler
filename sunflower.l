@@ -24,6 +24,7 @@ char *substr(char *dest, char *src, int start, int cnt);
 char *insertInstr(char *text, char *mid, int addr);
 char *findLastLine(char *text);
 int findLastLineAddr(char *text);
+void debugMode(char* text, int flag);
 
 int integer_length(int integer);
 int REG_TEMP[10] = {0};
@@ -265,10 +266,9 @@ char *substr(char *dest, char *src, int start, int cnt) {
 char *insertInstr(char *text, char *mid, int addr) {
     char *output = (char*)malloc(strlen(text) + strlen(mid));
     strncpy(output, text, addr);
-    output[addr] = '\0';
-    combineStr(output, "\0");
-    strcat(output, mid);
-    strcat(output, text + addr);
+    output[addr] = '\0';    // '\n' => '\0'
+    strcat(output, mid);    // mid 開頭帶有 '\n'
+    strcat(output, text + addr);    // text + addr 這個位置是 '\n'
     return output;
 }
 
@@ -321,4 +321,11 @@ char *deleteLine(char *text, int addr) {
     free(front);
     free(behind);
     return output;
+}
+
+void debugMode(char* text, int flag) {
+    printf("########################################################\n");
+    printf("flag: %d\n\n", flag);
+    printf("%s\n", text);
+    printf("########################################################\n");
 }

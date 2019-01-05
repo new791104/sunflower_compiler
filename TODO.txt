@@ -16,13 +16,13 @@ sunflower.y 以及 sunflower.l 必須先引入此頭檔
 - primaryExpression
 4. Branches
 - IF (1/2)
-- IF ELSE 
+- IF ELSE (1/5)
 - NOT (1/2)
 - AND (1/3)
 - OR (1/3)
 - AND OR (1/4)
 - OR AND (1/4)
-- WHILE
+- WHILE 
 5. READ WRITE
 - READ
 - WRITE

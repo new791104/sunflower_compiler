@@ -529,14 +529,15 @@ char *substr(char *dest, char *src, int start, int cnt);
 char *insertInstr(char *text, char *mid, int addr);
 char *findLastLine(char *text);
 int findLastLineAddr(char *text);
+void debugMode(char* text, int flag);
 
 int integer_length(int integer);
 int REG_TEMP[10] = {0};
 int REG_TEMP_LENGTH = sizeof(REG_TEMP) / sizeof(int);
 int LABEL_COUNTER = 0;
-#line 537 "lex.yy.c"
+#line 538 "lex.yy.c"
 
-#line 539 "lex.yy.c"
+#line 540 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -754,9 +755,9 @@ YY_DECL
 		}
 
 	{
-#line 39 "sunflower.l"
+#line 40 "sunflower.l"
 
-#line 759 "lex.yy.c"
+#line 760 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -816,174 +817,174 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 40 "sunflower.l"
+#line 41 "sunflower.l"
 {yylineno++;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 41 "sunflower.l"
+#line 42 "sunflower.l"
 {return AND;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 42 "sunflower.l"
+#line 43 "sunflower.l"
 {return BEGIN_;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 43 "sunflower.l"
+#line 44 "sunflower.l"
 {return DO;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 44 "sunflower.l"
+#line 45 "sunflower.l"
 {return ELSE;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 45 "sunflower.l"
+#line 46 "sunflower.l"
 {return END;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 46 "sunflower.l"
+#line 47 "sunflower.l"
 {return ENDIF;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 47 "sunflower.l"
+#line 48 "sunflower.l"
 {return ENDWHILE;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 48 "sunflower.l"
+#line 49 "sunflower.l"
 {return EXIT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 49 "sunflower.l"
+#line 50 "sunflower.l"
 {return IF;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 50 "sunflower.l"
+#line 51 "sunflower.l"
 {return SET;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 51 "sunflower.l"
+#line 52 "sunflower.l"
 {return NOT;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 52 "sunflower.l"
+#line 53 "sunflower.l"
 {return OR;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 53 "sunflower.l"
+#line 54 "sunflower.l"
 {return PROGRAM;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 54 "sunflower.l"
+#line 55 "sunflower.l"
 {return READ;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 55 "sunflower.l"
+#line 56 "sunflower.l"
 {return THEN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 56 "sunflower.l"
+#line 57 "sunflower.l"
 {
     return VAR;
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 59 "sunflower.l"
+#line 60 "sunflower.l"
 {return WHILE;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 60 "sunflower.l"
+#line 61 "sunflower.l"
 {return WRITE;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 61 "sunflower.l"
+#line 62 "sunflower.l"
 {return ADD;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 62 "sunflower.l"
+#line 63 "sunflower.l"
 {return SUB;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 63 "sunflower.l"
+#line 64 "sunflower.l"
 {return MUL;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 64 "sunflower.l"
+#line 65 "sunflower.l"
 {return DIV;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 65 "sunflower.l"
+#line 66 "sunflower.l"
 {return MOD;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 66 "sunflower.l"
+#line 67 "sunflower.l"
 {return GIVE;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 67 "sunflower.l"
+#line 68 "sunflower.l"
 {return EQUAL;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 68 "sunflower.l"
+#line 69 "sunflower.l"
 {return NEQUAL;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 69 "sunflower.l"
+#line 70 "sunflower.l"
 {return GREATER;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 70 "sunflower.l"
+#line 71 "sunflower.l"
 {return GEQUAL;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 71 "sunflower.l"
+#line 72 "sunflower.l"
 {return SMALLER;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 72 "sunflower.l"
+#line 73 "sunflower.l"
 {return SEQUAL;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 73 "sunflower.l"
+#line 74 "sunflower.l"
 {return LEFTBRACKET;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 74 "sunflower.l"
+#line 75 "sunflower.l"
 {return RIGHTBRACKET;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 77 "sunflower.l"
+#line 78 "sunflower.l"
 {
     if (yyleng > 16) {
         char buffer[10];
@@ -996,7 +997,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 86 "sunflower.l"
+#line 87 "sunflower.l"
 {
     int integer = atoi(yytext);
     if (integer > 0x4FFF || integer < -0x4FFF) {
@@ -1010,7 +1011,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 97 "sunflower.l"
+#line 98 "sunflower.l"
 {
     BEGIN COMMENT;
 }
@@ -1018,7 +1019,7 @@ YY_RULE_SETUP
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 101 "sunflower.l"
+#line 102 "sunflower.l"
 {
     yylineno++;
     BEGIN INITIAL;
@@ -1026,20 +1027,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 106 "sunflower.l"
+#line 107 "sunflower.l"
 {
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 109 "sunflower.l"
+#line 110 "sunflower.l"
 {
     // do nothing
 }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 113 "sunflower.l"
+#line 114 "sunflower.l"
 {
     char buffer[1];
     sprintf(buffer, "Lexical error: line %d unknown character %s\n", yylineno, yytext);
@@ -1048,10 +1049,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 119 "sunflower.l"
+#line 120 "sunflower.l"
 ECHO;
 	YY_BREAK
-#line 1054 "lex.yy.c"
+#line 1055 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -2057,7 +2058,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 119 "sunflower.l"
+#line 120 "sunflower.l"
 
 int yywrap()
 {
@@ -2207,10 +2208,9 @@ char *substr(char *dest, char *src, int start, int cnt) {
 char *insertInstr(char *text, char *mid, int addr) {
     char *output = (char*)malloc(strlen(text) + strlen(mid));
     strncpy(output, text, addr);
-    output[addr] = '\0';
-    combineStr(output, "\0");
-    strcat(output, mid);
-    strcat(output, text + addr);
+    output[addr] = '\0';    // '\n' => '\0'
+    strcat(output, mid);    // mid 開頭帶有 '\n'
+    strcat(output, text + addr);    // text + addr 這個位置是 '\n'
     return output;
 }
 
@@ -2263,4 +2263,11 @@ char *deleteLine(char *text, int addr) {
     free(front);
     free(behind);
     return output;
+}
+
+void debugMode(char* text, int flag) {
+    printf("########################################################\n");
+    printf("flag: %d\n\n", flag);
+    printf("%s\n", text);
+    printf("########################################################\n");
 }

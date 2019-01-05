@@ -26,6 +26,7 @@ extern char *substr(char *dest, char *src, int start, int cnt);
 extern char *insertInstr(char *text, char *mid, int addr);
 extern char *findLastLine(char *text);
 extern int findLastLineAddr(char *text);
+extern void debugMode(char* text, int flag);
 
 char *data = "\t.data";
 char *text = "\n\t.text\nmain:";
@@ -65,8 +66,15 @@ declarations:
     | /* empty */ { printf("declarations -> empty\n"); }
     ;
 statements: 
-    statements statement { printf("statements -> statements statement\n"); }
-    | /* empty */  { printf("statements -> empty\n"); }
+    statements statement { 
+        printf("statements -> statements statement\n"); 
+        // text = combineStr(text, "\n# STMTS #");
+        debugMode(text, strlen(text));
+        $$.last_addr = strlen(text);
+    }
+    | /* empty */  { 
+        printf("statements -> empty\n");
+    }
     ;
 statement: 
     SET IDENTIFIER GIVE arithmeticExpression { 
@@ -96,16 +104,25 @@ statement:
     }
     | IF booleanExpression THEN statements ELSE statements ENDIF { 
         printf("statement -> If booleanExpression Then statements Else statements EndIf\n"); 
+        // 需要修正 Or insert 過後 statements 傳回的插斷點
+        int insert_offset = 0;
         if (!$2.isAnd) {
-            // Or
-            int last_addr = $2.last_addr;
+            // insert or_label_stmt
+            int or_addr = $2.last_addr;
             char *label_stmt_2 = $2.label_stmt;
             char *mid = findLastLine(label_stmt_2);
             printf("##### mid: %s\n", mid);
-            text = insertInstr(text, mid, last_addr);
+            text = insertInstr(text, mid, or_addr);
+            insert_offset = strlen(mid);
         }
         // insert "\nb Lnext\n$2.label_else"
+        int stmt_addr = $4.last_addr;
+        char result[20], *Lnext = newLabel(), *mid;
+        debugMode("stmt_addr", stmt_addr);
+        snprintf(result, sizeof(result), "\nb %s%s", Lnext, $2.label_else);
+        text = insertInstr(text, result, stmt_addr + insert_offset);
         // add Lnext:
+        text = combineStr(text, formatLabel(Lnext));
     }
     | WHILE booleanExpression DO statements ENDWHILE { printf("statement -> While booleanExpression Do statements EndWhile\n"); }
     | READ IDENTIFIER { printf("statement -> Read Identifier\n"); }

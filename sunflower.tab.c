@@ -92,12 +92,13 @@ extern char *substr(char *dest, char *src, int start, int cnt);
 extern char *insertInstr(char *text, char *mid, int addr);
 extern char *findLastLine(char *text);
 extern int findLastLineAddr(char *text);
+extern void debugMode(char* text, int flag);
 
 char *data = "\t.data";
 char *text = "\n\t.text\nmain:";
 
 /* Line 371 of yacc.c  */
-#line 101 "sunflower.tab.c"
+#line 102 "sunflower.tab.c"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -198,7 +199,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 202 "sunflower.tab.c"
+#line 203 "sunflower.tab.c"
 
 #ifdef short
 # undef short
@@ -503,10 +504,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    45,    45,    58,    65,    68,    69,    72,    81,    97,
-     110,   111,   112,   113,   116,   135,   164,   180,   194,   199,
-     207,   217,   227,   237,   247,   257,   269,   275,   281,   287,
-     293,   299,   305,   311,   318,   324,   331,   337
+       0,    46,    46,    59,    66,    69,    75,    80,    89,   105,
+     127,   128,   129,   130,   133,   152,   181,   197,   211,   216,
+     224,   234,   244,   254,   264,   274,   286,   292,   298,   304,
+     310,   316,   322,   328,   335,   341,   348,   354
 };
 #endif
 
@@ -1452,7 +1453,7 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 45 "sunflower.y"
+#line 46 "sunflower.y"
     { 
         char *finish = "\nli $v0, 10\nsyscall";
         printf("program -> Program Identifier Begin declarations statements End\n");
@@ -1468,7 +1469,7 @@ yyreduce:
 
   case 3:
 /* Line 1792 of yacc.c  */
-#line 58 "sunflower.y"
+#line 59 "sunflower.y"
     { 
         printf("declarations -> declarations Var Identifier\n");
         char *result = "\n";
@@ -1480,25 +1481,32 @@ yyreduce:
 
   case 4:
 /* Line 1792 of yacc.c  */
-#line 65 "sunflower.y"
+#line 66 "sunflower.y"
     { printf("declarations -> empty\n"); }
     break;
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 68 "sunflower.y"
-    { printf("statements -> statements statement\n"); }
+#line 69 "sunflower.y"
+    { 
+        printf("statements -> statements statement\n"); 
+        // text = combineStr(text, "\n# STMTS #");
+        debugMode(text, strlen(text));
+        (yyval.stmt).last_addr = strlen(text);
+    }
     break;
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 69 "sunflower.y"
-    { printf("statements -> empty\n"); }
+#line 75 "sunflower.y"
+    { 
+        printf("statements -> empty\n");
+    }
     break;
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 72 "sunflower.y"
+#line 80 "sunflower.y"
     { 
         printf("statement -> Set Identifier = arithmeticExpression\n");
         char result[40], *rd = (yyvsp[(4) - (4)].stmt).reg, *rs = getReg(), *var_label = (yyvsp[(2) - (4)].stmt).var_label;
@@ -1512,7 +1520,7 @@ yyreduce:
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 81 "sunflower.y"
+#line 89 "sunflower.y"
     { 
         printf("statement -> If booleanExpression Then statements EndIf\n");
         // text = combineStr(text, "\n### statement -> If booleanExpression Then statements EndIf");
@@ -1533,49 +1541,58 @@ yyreduce:
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 97 "sunflower.y"
+#line 105 "sunflower.y"
     { 
         printf("statement -> If booleanExpression Then statements Else statements EndIf\n"); 
+        // 需要修正 or insert 過後 statements 傳回的插斷點
+        int insert_offset = 0;
         if (!(yyvsp[(2) - (7)].branch).isAnd) {
-            // Or
-            int last_addr = (yyvsp[(2) - (7)].branch).last_addr;
+            // insert or_label_stmt
+            int or_addr = (yyvsp[(2) - (7)].branch).last_addr;
             char *label_stmt_2 = (yyvsp[(2) - (7)].branch).label_stmt;
             char *mid = findLastLine(label_stmt_2);
             printf("##### mid: %s\n", mid);
-            text = insertInstr(text, mid, last_addr);
+            text = insertInstr(text, mid, or_addr);
+            insert_offset = strlen(mid);
         }
         // insert "\nb Lnext\n$2.label_else"
+        int stmt_addr = (yyvsp[(4) - (7)].stmt).last_addr;
+        char result[20], *Lnext = newLabel(), *mid;
+        debugMode("stmt_addr", stmt_addr);
+        snprintf(result, sizeof(result), "\nb %s%s", Lnext, (yyvsp[(2) - (7)].branch).label_else);
+        text = insertInstr(text, result, stmt_addr + insert_offset);
         // add Lnext:
+        text = combineStr(text, formatLabel(Lnext));
     }
     break;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 110 "sunflower.y"
+#line 127 "sunflower.y"
     { printf("statement -> While booleanExpression Do statements EndWhile\n"); }
     break;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 111 "sunflower.y"
+#line 128 "sunflower.y"
     { printf("statement -> Read Identifier\n"); }
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 112 "sunflower.y"
+#line 129 "sunflower.y"
     { printf("statement -> Write arithmeticExpression\n"); }
     break;
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 113 "sunflower.y"
+#line 130 "sunflower.y"
     { printf("statement -> Exit\n"); }
     break;
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 116 "sunflower.y"
+#line 133 "sunflower.y"
     { 
         printf("booleanExpression -> booleanExpression Or booleanTerm\n");
         // text = combineStr(text, "\n### booleanExpression -> booleanExpression Or booleanTerm");
@@ -1599,7 +1616,7 @@ yyreduce:
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 135 "sunflower.y"
+#line 152 "sunflower.y"
     { 
         printf("booleanExpression -> booleanTerm\n");
         // text = combineStr(text, "\n### booleanExpression -> booleanTerm");
@@ -1631,7 +1648,7 @@ yyreduce:
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 164 "sunflower.y"
+#line 181 "sunflower.y"
     {
         printf("booleanTerm -> booleanTerm And booleanFactor\n");
         // text = combineStr(text, "\n### booleanTerm -> booleanTerm And booleanFactor");
@@ -1652,7 +1669,7 @@ yyreduce:
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 180 "sunflower.y"
+#line 197 "sunflower.y"
     {
         printf("booleanTerm -> booleanFactor\n");
         // text = combineStr(text, "\n### booleanTerm -> booleanFactor");
@@ -1669,7 +1686,7 @@ yyreduce:
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 194 "sunflower.y"
+#line 211 "sunflower.y"
     { 
         printf("booleanFactor -> Not booleanFactor\n");
         (yyval.branch).label_else = (yyvsp[(2) - (2)].branch).label_stmt;
@@ -1679,7 +1696,7 @@ yyreduce:
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 199 "sunflower.y"
+#line 216 "sunflower.y"
     { 
         printf("booleanFactor -> relationExpression\n");
         // text = combineStr(text, "\n### booleanFactor -> relationExpression");
@@ -1690,7 +1707,7 @@ yyreduce:
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 207 "sunflower.y"
+#line 224 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression == arithmeticExpression\n");
         // text = combineStr(text, "\n### ==");
@@ -1705,7 +1722,7 @@ yyreduce:
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 217 "sunflower.y"
+#line 234 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression <> arithmeticExpression\n");
         // text = combineStr(text, "\n### <>"); 
@@ -1720,7 +1737,7 @@ yyreduce:
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 227 "sunflower.y"
+#line 244 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression > arithmeticExpression\n");
         // text = combineStr(text, "\n### >"); 
@@ -1735,7 +1752,7 @@ yyreduce:
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 237 "sunflower.y"
+#line 254 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression >= arithmeticExpression\n"); 
         // text = combineStr(text, "\n### >="); 
@@ -1750,7 +1767,7 @@ yyreduce:
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 247 "sunflower.y"
+#line 264 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression < arithmeticExpression\n");
         // text = combineStr(text, "\n### <");
@@ -1765,7 +1782,7 @@ yyreduce:
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 257 "sunflower.y"
+#line 274 "sunflower.y"
     { 
         printf("relationExpression -> arithmeticExpression <= arithmeticExpression\n");
         // text = combineStr(text, "\n### <=");
@@ -1780,7 +1797,7 @@ yyreduce:
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 269 "sunflower.y"
+#line 286 "sunflower.y"
     { 
         printf("arithmeticExpression -> arithmeticExpression + arithmeticTerm\n"); 
         text = makeAluInstr(text, "add", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
@@ -1791,7 +1808,7 @@ yyreduce:
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 275 "sunflower.y"
+#line 292 "sunflower.y"
     { 
         printf("arithmeticExpression -> arithmeticExpression - arithmeticTerm\n");
         text = makeAluInstr(text, "sub", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
@@ -1802,7 +1819,7 @@ yyreduce:
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 281 "sunflower.y"
+#line 298 "sunflower.y"
     { 
         printf("arithmeticExpression -> arithmeticTerm\n");
         (yyval.stmt).reg = (yyvsp[(1) - (1)].stmt).reg;
@@ -1811,7 +1828,7 @@ yyreduce:
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 287 "sunflower.y"
+#line 304 "sunflower.y"
     { 
         printf("arithmeticTerm -> arithmeticTerm * arithmeticFactor\n");
         text = makeAluInstr(text, "mul", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
@@ -1822,7 +1839,7 @@ yyreduce:
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 293 "sunflower.y"
+#line 310 "sunflower.y"
     { 
         printf("arithmeticTerm -> arithmeticTerm / arithmeticFactor\n"); 
         text = makeAluInstr(text, "div", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
@@ -1833,7 +1850,7 @@ yyreduce:
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 299 "sunflower.y"
+#line 316 "sunflower.y"
     { 
         printf("arithmeticTerm -> arithmeticTerm % arithmeticFactor\n"); 
         text = makeAluInstr(text, "rem", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
@@ -1844,7 +1861,7 @@ yyreduce:
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 305 "sunflower.y"
+#line 322 "sunflower.y"
     { 
         printf("arithmeticTerm -> arithmeticFactor\n");
         (yyval.stmt).reg = (yyvsp[(1) - (1)].stmt).reg;
@@ -1853,7 +1870,7 @@ yyreduce:
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 311 "sunflower.y"
+#line 328 "sunflower.y"
     { 
         printf("arithmeticFactor -> arithmeticFactor\n");
         char result[20], *rd = (yyvsp[(2) - (2)].stmt).reg, *rs = (yyvsp[(2) - (2)].stmt).reg;
@@ -1865,7 +1882,7 @@ yyreduce:
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 318 "sunflower.y"
+#line 335 "sunflower.y"
     { 
         printf("arithmeticFactor -> primaryExpression\n");
         (yyval.stmt).reg = (yyvsp[(1) - (1)].stmt).reg;
@@ -1874,7 +1891,7 @@ yyreduce:
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 324 "sunflower.y"
+#line 341 "sunflower.y"
     { 
         printf("primaryExpression -> IntConst\n");
         char result[20], *reg = getReg(), *intconst = (yyvsp[(1) - (1)].stmt).reg;
@@ -1886,7 +1903,7 @@ yyreduce:
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 331 "sunflower.y"
+#line 348 "sunflower.y"
     { 
         printf("primaryExpression -> Identifier\n");
         char *reg = getReg();
@@ -1897,7 +1914,7 @@ yyreduce:
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 337 "sunflower.y"
+#line 354 "sunflower.y"
     { 
         printf("primaryExpression -> arithmeticExpression\n");
         (yyval.stmt).reg = (yyvsp[(2) - (3)].stmt).reg;
@@ -1906,7 +1923,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 1910 "sunflower.tab.c"
+#line 1927 "sunflower.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2138,6 +2155,6 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 342 "sunflower.y"
+#line 359 "sunflower.y"
 
 
