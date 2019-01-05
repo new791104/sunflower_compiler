@@ -49,6 +49,9 @@ program:
         fwrite(data, 1, strlen(data), yyout);
         fwrite(text, 1, strlen(text), yyout);
         fwrite(finish, 1, strlen(finish), yyout);
+        free(data);
+        free(text);
+        free(finish);
     };
 
 declarations: 
@@ -80,21 +83,19 @@ statement:
         // text = combineStr(text, "\n### statement -> If booleanExpression Then statements EndIf");
         // char result[20];
         // snprintf(result, sizeof(result), "%s", $2.label_else);
-        if ($2.isAnd) {
-            // And
-        }
-        else {
+        if (!$2.isAnd) {
             // Or
             int last_addr = $2.last_addr;
-            // printf("#### $2.label_stmt: %s\n", $2.label_stmt);
-            char *front = malloc(last_addr + 1), *mid = findLastLine($2.label_stmt);
+            char *label_stmt_2 = $2.label_stmt;
+            char *mid = findLastLine(label_stmt_2);
+            printf("##### mid: %s\n", mid);
             text = insertInstr(text, mid, last_addr);
-            
         }
         text = combineStr(text, $2.label_else);
     }
     | IF booleanExpression THEN statements ELSE statements ENDIF { 
         printf("statement -> If booleanExpression Then statements Else statements EndIf\n"); 
+
     }
     | WHILE booleanExpression DO statements ENDWHILE { printf("statement -> While booleanExpression Do statements EndWhile\n"); }
     | READ IDENTIFIER { printf("statement -> Read Identifier\n"); }
@@ -105,25 +106,27 @@ booleanExpression:
     booleanExpression OR booleanTerm { 
         printf("booleanExpression -> booleanExpression Or booleanTerm\n");
         // text = combineStr(text, "\n### booleanExpression -> booleanExpression Or booleanTerm");
+        char *label_else_1 = $1.label_else;
         if ($1.isAnd) {
-            // text = insertInstr(text, "delete Here!!!", $1.last_addr);
-            int last_line_size = strlen(findLastLine(text));
-            text = deleteLine(text, $1.last_addr);
-            text = insertInstr(text, findLastLine($1.label_else), $1.last_addr - last_line_size + 1);
-            // delete from label_else
-            $1.label_else = deleteLine($1.label_else, strlen($1.label_else));
+            char *text_tmp = text;
+            int last_line_size = strlen(findLastLine(text_tmp));
+            printf("######### last_line_size: %d\n", last_line_size);
+            text = deleteLine(text_tmp, $1.last_addr);
+            text = insertInstr(text, label_else_1, $1.last_addr - last_line_size + 1);
+            label_else_1 = "\0";
         }
         text = combineStr(text, $1.label_stmt);
 
         $$.last_addr = strlen(text);
-        $$.label_else = combineStr(formatLabel($1.label_else), formatLabel($3.label_else));
+        $$.label_else = combineStr(formatLabel(label_else_1), formatLabel($3.label_else));
         $$.label_stmt = combineStr(formatLabel($1.label_stmt), formatLabel($3.label_stmt));
         $$.isAnd = 0;
     }
     | booleanTerm { 
         printf("booleanExpression -> booleanTerm\n");
         // text = combineStr(text, "\n### booleanExpression -> booleanTerm");
-        if ($1.isAnd) {
+        if ($1.isAnd == 1) {
+            printf("# $1.isAnd addr: %d\n", $1.last_addr);
             // insert
             char *mid = $1.label_stmt;
             // char *hint = combineStr(mid, "\nbooleanTerm insert HERE HAHA!!!");
@@ -132,12 +135,18 @@ booleanExpression:
 
             $$.last_addr = strlen(text);
         }
-        else {
+        else if ($1.isAnd == 0) {
             text = combineStr(text, $1.label_else);
             // $1.label_else = deleteLine($1.label_else, strlen($1.label_else));
-            $$.label_else = "";
-            printf("######### $$.label_else: %s\n", $$.label_else);
+            $$.label_else = "\0";
+            $$.last_addr = strlen(text);
             // text = combineStr(text, "\n### booleanTerm");
+        }
+        else {
+            text = combineStr(text, formatLabel($1.label_stmt));
+            $$.label_stmt = formatLabel($1.label_stmt);
+            $$.label_else = formatLabel($1.label_else);
+            $$.last_addr = strlen(text);
         }
     }
     ;
@@ -165,9 +174,10 @@ booleanTerm:
         snprintf(result, sizeof(result), "\nb %s", label_else);
         text = combineStr(text, result);
         $$.last_addr = strlen(text);
+        printf("# $$.last_addr: %d\n", $$.last_addr);
         $$.label_else = formatLabel(label_else);
         $$.label_stmt = formatLabel(label_stmt);
-        $$.isAnd = 0;
+        $$.isAnd = -1;
     }
     ;
 booleanFactor: 

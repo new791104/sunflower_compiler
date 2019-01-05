@@ -11,20 +11,27 @@ lw $t0, 0($t0)
 li $t1, 1
 beq $t0, $t1, L1
 b L0
-L0:
+L1:
 la $t0, n
 lw $t0, 0($t0)
 li $t1, 2
-bgt $t0, $t1, L3
+beq $t0, $t1, L3
 b L2
-L1:
+L0:
+L2:
+la $t0, n
+lw $t0, 0($t0)
+li $t1, 3
+beq $t0, $t1, L5
+b L4
 L3:
+L5:
 la $t0, n
 lw $t0, 0($t0)
 li $t1, 5
 add $t0, $t0, $t1
 la $t1, n
 sw $t0, 0($t1)
-L2:
+L4:
 li $v0, 10
 syscall

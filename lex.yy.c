@@ -2121,7 +2121,9 @@ char *makeIdentifierInstr(char *text, char *reg, char *label) {
     char result[40] = {0};
     snprintf(result, sizeof(result), "\nla %s, %s", reg, label);
     snprintf(result, sizeof(result), "%s\nlw %s, 0(%s)", result, reg, reg);
+    
     text = combineStr(text, result);
+    printf("# flag\n");
     return text;
 }
 
@@ -2139,7 +2141,7 @@ char *formatLabel(char *label) {
     char *nexline = "\n", *colon = ":";
     char *label_format = malloc(strlen(label) + 2 + 1);
     label_format[strlen(label_format) - 1] = '\0';
-    sprintf(label_format, "\n%s:", label);
+    sprintf(label_format, "\n%s:\0", label);
     return label_format;
 }
 
@@ -2224,10 +2226,8 @@ char *findLastLine(char *text) {
             break;
         }
     }
-    output = malloc(i + 1);
-    printf("#### text_len - i: %d\n", text_len - i);
+    output = malloc(text_len);
     strncpy(output, text + text_len - i, text_len);
-    printf("##### output: %s\n", output);
     return output;
 }
 
@@ -2254,11 +2254,15 @@ char *deleteLine(char *text, int addr) {
         }
     }
     output = malloc(text_len);
-    front = malloc(i);
-    behind = malloc(text_len - addr + 1);
+    front = malloc(text_len);
+    behind = malloc(text_len);
+    output[0] = '\0';
+    front[0] = '\0';
+    behind[0] = '\0';
     strncpy(front, text, i);
     strncpy(behind, text + addr, text_len - addr + 1);
     output = combineStr(front, behind);
-    printf("##################\n%s#######################\n", output);
+    free(front);
+    free(behind);
     return output;
 }

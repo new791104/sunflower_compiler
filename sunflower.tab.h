@@ -91,7 +91,7 @@ typedef struct branch_type
    char *reg;
    char *label_stmt;
    char *label_else;
-   int isAnd;
+   int isAnd; /*isAnd 代表上一個邏輯運算為: 1.And 2.Or 3.沒有邏輯運算*/
    int last_addr;
 } branch_type;
 

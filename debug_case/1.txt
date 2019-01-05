@@ -1,0 +1,34 @@
+%%%%%%%%%%%
+CASE CLOSED
+%%%%%%%%%%%
+問題函數:
+char *findLastLine(char*)
+中 output = malloc(text_len) 的大小不夠大
+不能夠只給剛好的大小，至少給兩倍
+參閱:
+https://stackoverflow.com/questions/24970945/error-in-printing-array-of-strings-in-c
+
+######
+Input:
+######
+Program sum Begin
+    Var n
+    Set n = 1
+    If n == 1 And n > 2 Or n > 3 Then
+        Set n = n + 5
+    EndIf
+End
+
+########
+Problem:
+########
+make 過後重複 parse 會造成錯位
+猜測是因為 *data、*text 內的資料還暫存在記憶體
+因而導致在字串處理的時候出了問題
+問題節點:
+1. IF booleanExpression THEN statements ENDIF
+2. booleanExpression OR booleanTerm
+可疑的函數:
+1. char *findLastLine(char*)
+2. char *deleteLine(char*, int)
+3. char *insertInstr(char*, char*, int)
