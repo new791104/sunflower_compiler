@@ -1,7 +1,7 @@
 Program sum Begin
     Var n
     Set n = 1
-    If Not n == 1 Then
+    If n == 1 And Not n == 2 Then
         Set n = n + 4
     EndIf
 End

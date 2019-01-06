@@ -13,7 +13,7 @@ char *getReg();
 void putReg(char*);
 char *makeAluInstr(char*, char*, char*, char*, char*);
 char *makeIdentifierInstr(char*, char*, char*);
-char* makeBranchInstr(char*, char*, char*, char*, char*);
+char *makeBranchInstr(char *text, char *op, char *rs, char *rt, char *label_stmt, char *label_else);
 char *newLabel();
 char *makebooleanTermInstr(char *text, branch_type branch);
 char *deleteLine(char *text, int addr);
@@ -169,9 +169,9 @@ char *makeAluInstr(char *text, char *op, char *rs, char *rt, char *rd) {
     return text;
 }
 
-char *makeBranchInstr(char *text, char *op, char *rs, char *rt, char *label) {
-    char result[20];
-    snprintf(result, sizeof(result), "\n%s %s, %s, %s", op, rs, rt, label);
+char *makeBranchInstr(char *text, char *op, char *rs, char *rt, char *label_stmt, char *label_else) {
+    char result[40];
+    snprintf(result, sizeof(result), "\n%s %s, %s, %s\nb %s", op, rs, rt, label_stmt, label_else);
     text = combineStr(text, result);
     return text;
 }
@@ -267,8 +267,10 @@ char *insertInstr(char *text, char *mid, int addr) {
     char *output = (char*)malloc(strlen(text) + strlen(mid));
     strncpy(output, text, addr);
     output[addr] = '\0';    // '\n' => '\0'
-    strcat(output, mid);    // mid 開頭帶有 '\n'
-    strcat(output, text + addr);    // text + addr 這個位置是 '\n'
+    // strcat(output, mid);    // mid 開頭帶有 '\n'
+    // strcat(output, text + addr);    // text + addr 這個位置是 '\n'
+    output = combineStr(output, mid);
+    output = combineStr(output, text + addr);
     return output;
 }
 

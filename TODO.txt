@@ -23,10 +23,12 @@ sunflower.y 以及 sunflower.l 必須先引入此頭檔
 - AND OR (1/4)
 - OR AND (1/4)
 - WHILE 
+    加 first_addr
 5. READ WRITE
 - READ
 - WRITE
 6. System calls
+- EXIT
 7. Debug:
 8. 收尾
 - 整合重複代碼
