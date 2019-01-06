@@ -133,9 +133,30 @@ statement:
         // add $2.label_else:
         text = combineStr(text, $2.label_else); 
     }
-    | READ IDENTIFIER { printf("statement -> Read Identifier\n"); }
-    | WRITE arithmeticExpression { printf("statement -> Write arithmeticExpression\n"); }
-    | EXIT { printf("statement -> Exit\n"); }
+    | READ IDENTIFIER { 
+        printf("statement -> Read Identifier\n"); 
+        char result[40], *reg = getReg();
+        snprintf(result, sizeof(result), "\nli $v0, 5\nsyscall");
+        text = combineStr(text, result);
+        snprintf(result, sizeof(result), "\nla %s, %s", reg, $2.var_label);
+        text = combineStr(text, result);
+        snprintf(result, sizeof(result), "\nsw $v0, 0(%s)", reg);
+        text = combineStr(text, result);
+        putReg(reg);
+    }
+    | WRITE arithmeticExpression { 
+        printf("statement -> Write arithmeticExpression\n"); 
+        char result[40], *reg = $2.reg;
+        snprintf(result, sizeof(result), "\nmove $a0, %s", reg);
+        text = combineStr(text, result);
+        snprintf(result, sizeof(result), "\nli $v0, 1\nsyscall", reg);
+        text = combineStr(text, result);
+    }
+    | EXIT { 
+        printf("statement -> Exit\n"); 
+        char *finish = "\nli $v0, 10\nsyscall";
+        text = combineStr(text, finish);
+    }
     ;
 booleanExpression: 
     booleanExpression OR booleanTerm { 
@@ -195,9 +216,6 @@ booleanTerm:
         int last_addr = $1.last_addr;
         // insert
         text = insertInstr(text, mid, last_addr);
-        // snprintf(result, sizeof(result), "\nb %s%s", $3.label_else, formatLabel($3.label_stmt));
-        // snprintf(result, sizeof(result), "\nb %s", $3.label_else);
-        // text = combineStr(text, result);
         
         $$.last_addr = strlen(text);
         $$.label_else = combineStr($1.label_else, formatLabel($3.label_else));
@@ -207,10 +225,6 @@ booleanTerm:
     }
     | booleanFactor {
         printf("booleanTerm -> booleanFactor\n");
-        // text = combineStr(text, "\n### booleanTerm -> booleanFactor");
-        // char result[20], *label_else = $1.label_else, *label_stmt = $1.label_stmt;
-        // snprintf(result, sizeof(result), "\nb %s", label_else);
-        // text = combineStr(text, result);
         $$.last_addr = strlen(text);
         $$.label_else = formatLabel($1.label_else);
         $$.label_stmt = formatLabel($1.label_stmt);

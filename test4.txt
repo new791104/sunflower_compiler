@@ -1,0 +1,5 @@
+Program sum Begin
+    Var n
+    Write 1
+    Exit
+End

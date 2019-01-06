@@ -22,15 +22,15 @@ sunflower.y 以及 sunflower.l 必須先引入此頭檔
 - OR (1/3)
 - AND OR (1/4)
 - OR AND (1/4)
-- WHILE 
+- WHILE (1/6)
     加 first_addr
-5. READ WRITE
-- READ
-- WRITE
-6. System calls
-- EXIT
-7. Debug:
-8. 收尾
+5. System calls
+- READ (1/6)
+- WRITE (1/6)
+- EXIT (1/6)
+6. Debug:
+7. 收尾
 - 整合重複代碼
 - 總測試
 - 刪去所有監看點
+- 說明文件
