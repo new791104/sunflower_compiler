@@ -1455,7 +1455,7 @@ yyreduce:
 /* Line 1792 of yacc.c  */
 #line 46 "sunflower.y"
     { 
-        char *finish = "\nli $v0, 10\nsyscall";
+        char *finish = "\n\tli $v0, 10\n\tsyscall";
         printf("program -> Program Identifier Begin declarations statements End\n");
         printf("\nLexical errors: \n%s", exception_array);    
         fwrite(data, 1, strlen(data), yyout);
@@ -1510,8 +1510,8 @@ yyreduce:
     { 
         printf("statement -> Set Identifier = arithmeticExpression\n");
         char result[40], *rd = (yyvsp[(4) - (4)].stmt).reg, *rs = getReg(), *var_label = (yyvsp[(2) - (4)].stmt).var_label;
-        snprintf(result, sizeof(result), "\nla %s, %s", rs, var_label);
-        snprintf(result, sizeof(result), "%s\nsw %s, 0(%s)", result, rd, rs);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_label);
+        snprintf(result, sizeof(result), "%s\n\tsw %s, 0(%s)", result, rd, rs);
         text = combineStr(text, result);
         putReg(rs);
         putReg(rd);
@@ -1550,7 +1550,7 @@ yyreduce:
         int stmt_addr = (yyvsp[(4) - (7)].stmt).last_addr;
         char result[20], *Lnext = newLabel(), *mid;
         debugMode("stmt_addr", stmt_addr);
-        snprintf(result, sizeof(result), "\nb %s%s", Lnext, (yyvsp[(2) - (7)].branch).label_else);
+        snprintf(result, sizeof(result), "\n\tb %s%s", Lnext, (yyvsp[(2) - (7)].branch).label_else);
         text = insertInstr(text, result, stmt_addr + insert_offset);
         // add Lnext:
         text = combineStr(text, formatLabel(Lnext));
@@ -1573,7 +1573,7 @@ yyreduce:
         text = insertInstr(text, formatLabel(bLabel), (yyvsp[(2) - (5)].branch).first_addr);
         // add b Lbegin
         char result[20];
-        snprintf(result, sizeof(result), "\nb %s", bLabel);
+        snprintf(result, sizeof(result), "\n\tb %s", bLabel);
         text = combineStr(text, result);
         // add $2.label_else:
         text = combineStr(text, (yyvsp[(2) - (5)].branch).label_else); 
@@ -1586,11 +1586,11 @@ yyreduce:
     { 
         printf("statement -> Read Identifier\n"); 
         char result[40], *reg = getReg();
-        snprintf(result, sizeof(result), "\nli $v0, 5\nsyscall");
+        snprintf(result, sizeof(result), "\n\tli $v0, 5\n\tsyscall");
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nla %s, %s", reg, (yyvsp[(2) - (2)].stmt).var_label);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, (yyvsp[(2) - (2)].stmt).var_label);
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nsw $v0, 0(%s)", reg);
+        snprintf(result, sizeof(result), "\n\tsw $v0, 0(%s)", reg);
         text = combineStr(text, result);
         putReg(reg);
     }
@@ -1602,9 +1602,9 @@ yyreduce:
     { 
         printf("statement -> Write arithmeticExpression\n"); 
         char result[40], *reg = (yyvsp[(2) - (2)].stmt).reg;
-        snprintf(result, sizeof(result), "\nmove $a0, %s", reg);
+        snprintf(result, sizeof(result), "\n\tmove $a0, %s", reg);
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nli $v0, 1\nsyscall", reg);
+        snprintf(result, sizeof(result), "\n\tli $v0, 1\n\tsyscall", reg);
         text = combineStr(text, result);
     }
     break;
@@ -1614,7 +1614,7 @@ yyreduce:
 #line 155 "sunflower.y"
     { 
         printf("statement -> Exit\n"); 
-        char *finish = "\nli $v0, 10\nsyscall";
+        char *finish = "\n\tli $v0, 10\n\tsyscall";
         text = combineStr(text, finish);
     }
     break;
@@ -1632,7 +1632,7 @@ yyreduce:
             int last_line_size = strlen(findLastLine(text_tmp));
             printf("######### last_line_size: %d\n", last_line_size);
             text = deleteLine(text_tmp, (yyvsp[(1) - (3)].branch).last_addr);
-            text = insertInstr(text, label_else_1, (yyvsp[(1) - (3)].branch).last_addr - last_line_size + 1);
+            text = insertInstr(text, label_else_1, (yyvsp[(1) - (3)].branch).last_addr - last_line_size + 2);  // const(2): size of "\n\t"
             label_else_1 = "\0";
         }
         text = combineStr(text, (yyvsp[(1) - (3)].branch).label_stmt);
@@ -1907,7 +1907,7 @@ yyreduce:
     { 
         printf("arithmeticFactor -> arithmeticFactor\n");
         char result[20], *rd = (yyvsp[(2) - (2)].stmt).reg, *rs = (yyvsp[(2) - (2)].stmt).reg;
-        snprintf(result, sizeof(result), "\nneg %s, %s", rd, rs);
+        snprintf(result, sizeof(result), "\n\tneg %s, %s", rd, rs);
         text = combineStr(text, result);
         (yyval.stmt).reg = (yyvsp[(2) - (2)].stmt).reg;
     }
@@ -1929,7 +1929,7 @@ yyreduce:
         printf("primaryExpression -> IntConst\n");
         (yyval.stmt).first_addr = strlen(text);
         char result[20], *reg = getReg(), *intconst = (yyvsp[(1) - (1)].stmt).reg;
-        snprintf(result, sizeof(result), "\nli %s, %s", reg, intconst);
+        snprintf(result, sizeof(result), "\n\tli %s, %s", reg, intconst);
         text = combineStr(text, result);
         (yyval.stmt).reg = reg;
     }

@@ -2106,22 +2106,22 @@ void putReg(char *reg) {
 
 char *makeAluInstr(char *text, char *op, char *rs, char *rt, char *rd) {
     char result[20];
-    snprintf(result, sizeof(result), "\n%s %s, %s, %s", op, rd, rs, rt);
+    snprintf(result, sizeof(result), "\n\t%s %s, %s, %s", op, rd, rs, rt);
     text = combineStr(text, result);
     return text;
 }
 
 char *makeBranchInstr(char *text, char *op, char *rs, char *rt, char *label_stmt, char *label_else) {
     char result[40];
-    snprintf(result, sizeof(result), "\n%s %s, %s, %s\nb %s", op, rs, rt, label_stmt, label_else);
+    snprintf(result, sizeof(result), "\n\t%s %s, %s, %s\n\tb %s", op, rs, rt, label_stmt, label_else);
     text = combineStr(text, result);
     return text;
 }
 
 char *makeIdentifierInstr(char *text, char *reg, char *label) {
     char result[40] = {0};
-    snprintf(result, sizeof(result), "\nla %s, %s", reg, label);
-    snprintf(result, sizeof(result), "%s\nlw %s, 0(%s)", result, reg, reg);
+    snprintf(result, sizeof(result), "\n\tla %s, %s", reg, label);
+    snprintf(result, sizeof(result), "%s\n\tlw %s, 0(%s)", result, reg, reg);
     text = combineStr(text, result);
     return text;
 }

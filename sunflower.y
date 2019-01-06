@@ -44,7 +44,7 @@ char *text = "\n\t.text\nmain:";
 
 program: 
     PROGRAM IDENTIFIER BEGIN_ declarations statements END { 
-        char *finish = "\nli $v0, 10\nsyscall";
+        char *finish = "\n\tli $v0, 10\n\tsyscall";
         printf("program -> Program Identifier Begin declarations statements End\n");
         printf("\nLexical errors: \n%s", exception_array);    
         fwrite(data, 1, strlen(data), yyout);
@@ -80,8 +80,8 @@ statement:
     SET IDENTIFIER GIVE arithmeticExpression { 
         printf("statement -> Set Identifier = arithmeticExpression\n");
         char result[40], *rd = $4.reg, *rs = getReg(), *var_label = $2.var_label;
-        snprintf(result, sizeof(result), "\nla %s, %s", rs, var_label);
-        snprintf(result, sizeof(result), "%s\nsw %s, 0(%s)", result, rd, rs);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_label);
+        snprintf(result, sizeof(result), "%s\n\tsw %s, 0(%s)", result, rd, rs);
         text = combineStr(text, result);
         putReg(rs);
         putReg(rd);
@@ -110,7 +110,7 @@ statement:
         int stmt_addr = $4.last_addr;
         char result[20], *Lnext = newLabel(), *mid;
         debugMode("stmt_addr", stmt_addr);
-        snprintf(result, sizeof(result), "\nb %s%s", Lnext, $2.label_else);
+        snprintf(result, sizeof(result), "\n\tb %s%s", Lnext, $2.label_else);
         text = insertInstr(text, result, stmt_addr + insert_offset);
         // add Lnext:
         text = combineStr(text, formatLabel(Lnext));
@@ -128,7 +128,7 @@ statement:
         text = insertInstr(text, formatLabel(bLabel), $2.first_addr);
         // add b Lbegin
         char result[20];
-        snprintf(result, sizeof(result), "\nb %s", bLabel);
+        snprintf(result, sizeof(result), "\n\tb %s", bLabel);
         text = combineStr(text, result);
         // add $2.label_else:
         text = combineStr(text, $2.label_else); 
@@ -136,25 +136,25 @@ statement:
     | READ IDENTIFIER { 
         printf("statement -> Read Identifier\n"); 
         char result[40], *reg = getReg();
-        snprintf(result, sizeof(result), "\nli $v0, 5\nsyscall");
+        snprintf(result, sizeof(result), "\n\tli $v0, 5\n\tsyscall");
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nla %s, %s", reg, $2.var_label);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, $2.var_label);
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nsw $v0, 0(%s)", reg);
+        snprintf(result, sizeof(result), "\n\tsw $v0, 0(%s)", reg);
         text = combineStr(text, result);
         putReg(reg);
     }
     | WRITE arithmeticExpression { 
         printf("statement -> Write arithmeticExpression\n"); 
         char result[40], *reg = $2.reg;
-        snprintf(result, sizeof(result), "\nmove $a0, %s", reg);
+        snprintf(result, sizeof(result), "\n\tmove $a0, %s", reg);
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\nli $v0, 1\nsyscall", reg);
+        snprintf(result, sizeof(result), "\n\tli $v0, 1\n\tsyscall", reg);
         text = combineStr(text, result);
     }
     | EXIT { 
         printf("statement -> Exit\n"); 
-        char *finish = "\nli $v0, 10\nsyscall";
+        char *finish = "\n\tli $v0, 10\n\tsyscall";
         text = combineStr(text, finish);
     }
     ;
@@ -169,7 +169,7 @@ booleanExpression:
             int last_line_size = strlen(findLastLine(text_tmp));
             printf("######### last_line_size: %d\n", last_line_size);
             text = deleteLine(text_tmp, $1.last_addr);
-            text = insertInstr(text, label_else_1, $1.last_addr - last_line_size + 1);
+            text = insertInstr(text, label_else_1, $1.last_addr - last_line_size + 2);  // const(2): size of "\n\t"
             label_else_1 = "\0";
         }
         text = combineStr(text, $1.label_stmt);
@@ -361,7 +361,7 @@ arithmeticFactor:
     SUB arithmeticFactor { 
         printf("arithmeticFactor -> arithmeticFactor\n");
         char result[20], *rd = $2.reg, *rs = $2.reg;
-        snprintf(result, sizeof(result), "\nneg %s, %s", rd, rs);
+        snprintf(result, sizeof(result), "\n\tneg %s, %s", rd, rs);
         text = combineStr(text, result);
         $$.reg = $2.reg;
     }
@@ -375,7 +375,7 @@ primaryExpression:
         printf("primaryExpression -> IntConst\n");
         $$.first_addr = strlen(text);
         char result[20], *reg = getReg(), *intconst = $1.reg;
-        snprintf(result, sizeof(result), "\nli %s, %s", reg, intconst);
+        snprintf(result, sizeof(result), "\n\tli %s, %s", reg, intconst);
         text = combineStr(text, result);
         $$.reg = reg;
     }
