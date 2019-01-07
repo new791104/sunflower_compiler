@@ -69,7 +69,7 @@ statements:
     statements statement { 
         printf("statements -> statements statement\n"); 
         // text = combineStr(text, "\n# STMTS #");
-        debugMode(text, strlen(text));
+        // debugMode(text, strlen(text));
         $$.last_addr = strlen(text);
     }
     | /* empty */  { 
@@ -109,7 +109,7 @@ statement:
         // insert "\nb Lnext\n$2.label_else"
         int stmt_addr = $4.last_addr;
         char result[20], *Lnext = newLabel(), *mid;
-        debugMode("stmt_addr", stmt_addr);
+        // debugMode("stmt_addr", stmt_addr);
         snprintf(result, sizeof(result), "\n\tb %s%s", Lnext, $2.label_else);
         text = insertInstr(text, result, stmt_addr + insert_offset);
         // add Lnext:
@@ -117,7 +117,6 @@ statement:
     }
     | WHILE booleanExpression DO statements ENDWHILE { 
         printf("statement -> While booleanExpression Do statements EndWhile\n");
-
         if (!$2.isAnd) {
             // insert or_label_stmt
             char *mid = findLastLine($2.label_stmt);
@@ -167,7 +166,6 @@ booleanExpression:
         if ($1.isAnd) {
             char *text_tmp = text;
             int last_line_size = strlen(findLastLine(text_tmp));
-            printf("######### last_line_size: %d\n", last_line_size);
             text = deleteLine(text_tmp, $1.last_addr);
             text = insertInstr(text, label_else_1, $1.last_addr - last_line_size + 2);  // const(2): size of "\n\t"
             label_else_1 = "\0";
@@ -184,7 +182,6 @@ booleanExpression:
         $$.first_addr = $1.first_addr;
         // text = combineStr(text, "\n### booleanExpression -> booleanTerm");
         if ($1.isAnd == 1) {
-            printf("# $1.isAnd addr: %d\n", $1.last_addr);
             // insert
             char *mid = $1.label_stmt;
             // char *hint = combineStr(mid, "\nbooleanTerm insert HERE HAHA!!!");

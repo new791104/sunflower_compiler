@@ -2089,7 +2089,6 @@ char *getReg() {
             REG_TEMP[i] = 1;
             char index[1];
             sprintf(index, "%d", i);
-            // printf("#### index: %s\n", index);
             return combineStr("$t", index);
         }
     }
@@ -2221,7 +2220,6 @@ char *findLastLine(char *text) {
     char *output;
     for (i = 0; i <= text_len; i++) {
         char tmp = *(text + text_len - i);
-        printf("tmp: %c\n", tmp);
         if (tmp == '\n') {
             break;
         }
@@ -2235,7 +2233,6 @@ int findLastLineAddr(char *text) {
     int i = 0, text_len = strlen(text);
     for (i = 0; i <= text_len; i++) {
         char tmp = *(text + text_len - i);
-        printf("tmp: %c\n", tmp);
         if (tmp == '\n') {
             break;
         }
