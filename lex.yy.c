@@ -991,7 +991,7 @@ YY_RULE_SETUP
         sprintf(buffer, "Lexical error: line %d identifier length too long\n", yylineno);
         exception_array = combineStr(exception_array, buffer);
     }
-    yylval.stmt.var_label = combineStr(yytext, "\0");
+    yylval.stmt.var_name = combineStr(yytext, "\0");
     return IDENTIFIER;
 }
 	YY_BREAK

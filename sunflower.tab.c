@@ -1473,7 +1473,7 @@ yyreduce:
     { 
         printf("declarations -> declarations Var Identifier\n");
         char *result = "\n";
-        result = combineStr(result, (yyvsp[(3) - (3)].stmt).var_label);
+        result = combineStr(result, (yyvsp[(3) - (3)].stmt).var_name);
         result = combineStr(result, ":\n\t.word 0");
         data = combineStr(data, result);
     }
@@ -1509,8 +1509,8 @@ yyreduce:
 #line 80 "sunflower.y"
     { 
         printf("statement -> Set Identifier = arithmeticExpression\n");
-        char result[40], *rd = (yyvsp[(4) - (4)].stmt).reg, *rs = getReg(), *var_label = (yyvsp[(2) - (4)].stmt).var_label;
-        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_label);
+        char result[40], *rd = (yyvsp[(4) - (4)].stmt).reg, *rs = getReg(), *var_name = (yyvsp[(2) - (4)].stmt).var_name;
+        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_name);
         snprintf(result, sizeof(result), "%s\n\tsw %s, 0(%s)", result, rd, rs);
         text = combineStr(text, result);
         putReg(rs);
@@ -1587,7 +1587,7 @@ yyreduce:
         char result[40], *reg = getReg();
         snprintf(result, sizeof(result), "\n\tli $v0, 5\n\tsyscall");
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, (yyvsp[(2) - (2)].stmt).var_label);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, (yyvsp[(2) - (2)].stmt).var_name);
         text = combineStr(text, result);
         snprintf(result, sizeof(result), "\n\tsw $v0, 0(%s)", reg);
         text = combineStr(text, result);
@@ -1939,7 +1939,7 @@ yyreduce:
         printf("primaryExpression -> Identifier\n");
         (yyval.stmt).first_addr = strlen(text);
         char *reg = getReg();
-        text = makeIdentifierInstr(text, reg, (yyvsp[(1) - (1)].stmt).var_label);
+        text = makeIdentifierInstr(text, reg, (yyvsp[(1) - (1)].stmt).var_name);
         (yyval.stmt).reg = reg;
     }
     break;

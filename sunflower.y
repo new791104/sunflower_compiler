@@ -59,7 +59,7 @@ declarations:
     declarations VAR IDENTIFIER { 
         printf("declarations -> declarations Var Identifier\n");
         char *result = "\n";
-        result = combineStr(result, $3.var_label);
+        result = combineStr(result, $3.var_name);
         result = combineStr(result, ":\n\t.word 0");
         data = combineStr(data, result);
     }
@@ -79,8 +79,8 @@ statements:
 statement: 
     SET IDENTIFIER GIVE arithmeticExpression { 
         printf("statement -> Set Identifier = arithmeticExpression\n");
-        char result[40], *rd = $4.reg, *rs = getReg(), *var_label = $2.var_label;
-        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_label);
+        char result[40], *rd = $4.reg, *rs = getReg(), *var_name = $2.var_name;
+        snprintf(result, sizeof(result), "\n\tla %s, %s", rs, var_name);
         snprintf(result, sizeof(result), "%s\n\tsw %s, 0(%s)", result, rd, rs);
         text = combineStr(text, result);
         putReg(rs);
@@ -137,7 +137,7 @@ statement:
         char result[40], *reg = getReg();
         snprintf(result, sizeof(result), "\n\tli $v0, 5\n\tsyscall");
         text = combineStr(text, result);
-        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, $2.var_label);
+        snprintf(result, sizeof(result), "\n\tla %s, %s", reg, $2.var_name);
         text = combineStr(text, result);
         snprintf(result, sizeof(result), "\n\tsw $v0, 0(%s)", reg);
         text = combineStr(text, result);
@@ -380,7 +380,7 @@ primaryExpression:
         printf("primaryExpression -> Identifier\n");
         $$.first_addr = strlen(text);
         char *reg = getReg();
-        text = makeIdentifierInstr(text, reg, $1.var_label);
+        text = makeIdentifierInstr(text, reg, $1.var_name);
         $$.reg = reg;
     }
     | LEFTBRACKET arithmeticExpression RIGHTBRACKET { 

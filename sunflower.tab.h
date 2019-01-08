@@ -99,7 +99,7 @@ typedef struct branch_type
 typedef struct stmt_type
 {
    char *reg;
-   char *var_label;
+   char *var_name;
    int first_addr;
    int last_addr;
 } stmt_type;
