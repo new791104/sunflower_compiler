@@ -317,7 +317,7 @@ arithmeticExpression:
         printf("arithmeticExpression -> arithmeticExpression + arithmeticTerm\n"); 
         text = makeAluInstr(text, "add", $1.reg, $3.reg, $1.reg);
         putReg($3.reg);
-        $$ = $1;
+        $$.reg = $1.reg;
     }
     | arithmeticExpression SUB arithmeticTerm { 
         printf("arithmeticExpression -> arithmeticExpression - arithmeticTerm\n");

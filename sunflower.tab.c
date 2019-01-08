@@ -1832,7 +1832,7 @@ yyreduce:
         printf("arithmeticExpression -> arithmeticExpression + arithmeticTerm\n"); 
         text = makeAluInstr(text, "add", (yyvsp[(1) - (3)].stmt).reg, (yyvsp[(3) - (3)].stmt).reg, (yyvsp[(1) - (3)].stmt).reg);
         putReg((yyvsp[(3) - (3)].stmt).reg);
-        (yyval.stmt) = (yyvsp[(1) - (3)].stmt);
+        (yyval.stmt).reg = (yyvsp[(1) - (3)].stmt).reg;
     }
     break;
 

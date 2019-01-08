@@ -1,7 +1,9 @@
 Program sum Begin
     Var n
+    Var k
+    Set k = 0
     Set n = 1
-    While n == 1 Or n == 2 Do
-        Set n = n + 5
-    EndWhile
+    If n + 1 < k + 2 Then
+        Set n = n + 1
+    EndIf
 End
